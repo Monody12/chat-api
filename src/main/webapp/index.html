@@ -69,7 +69,7 @@
                             <el-menu-item :index="'2' + index.toString()" :key="item.id" @click="getChatHistory(index)">
                                 <i class="el-icon-chat-square" style="display: inline-block"></i>
                                 {{item.topic}}
-                                <i class="el-icon-edit" style="display: inline-block"></i>
+                                <i class="el-icon-edit" style="display: inline-block" @click="renameTopic(index)"></i>
                                 <i class="el-icon-delete" style="display: inline-block" @click="deleteTopic(index)"></i>
                             </el-menu-item>
                         </div>
@@ -434,6 +434,34 @@
                     this.$message.error('两次输入密码不一致')
                     return false
                 }
+            },
+            // 对话题改名称
+            renameTopic(index){
+                // 弹出一个输入框，输入新的话题名称
+                this.$prompt('请输入新的话题名称', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    inputPattern: /^.{1,15}$/,
+                    inputErrorMessage: '话题名称长度在1到15个字符之间',
+                    inputValue: this.topic[index].topic
+                }).then(({ value }) => {
+                    // 发送请求，修改话题名称
+                    axios.get('./chat/topic/rename', {
+                        params: {
+                            topicId: this.topic[index].id,
+                            topicName: value
+                        }
+                    }).then(response => {
+                        console.log("renameTopic: " + response.data.data);
+                        // 修改话题名称
+                        this.topic[index].topic = value;
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消修改'
+                    });
+                });
             },
             // 修改用户信息
             changeUserInfo() {
