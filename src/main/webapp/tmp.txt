@@ -1,0 +1,6 @@
+data: function() {
+				return {
+					message: '',
+					avatar: 'http://192.144.232.94:8080/netdisk/download/119412158613159936?isDownload=false'
+				}
+			}

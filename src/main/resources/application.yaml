@@ -1,0 +1,26 @@
+server:
+  port: 8081
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+spring:
+  redis:
+    host: vm.local
+    port: 6379
+    database: 1
+    password:
+
+
+chat:
+  key:
+    bind:
+      max: 2
+  py-server-url: http://192.144.232.94:8000
