@@ -18,11 +18,11 @@ public class InterceptorConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(loginInterceptor()).addPathPatterns("/**")
-                .excludePathPatterns("/user/login", "/user/register", "/user/logout", "/user/not_login")
-                .excludePathPatterns("/**/*.html", "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg",
-                        "/**/*.gif", "/**/*.svg", "/**/*.ico", "/**/*.woff","/**/*.map", "/**/*.ttf", "/**/*.woff2")
-                .excludePathPatterns("/error");
+        registry.addInterceptor(loginInterceptor()).addPathPatterns("/key/**", "/chat/**");
+//                .excludePathPatterns("/user/login", "/user/register", "/user/logout", "/user/not_login")
+//                .excludePathPatterns("/**/*.html", "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg",
+//                        "/**/*.gif", "/**/*.svg", "/**/*.ico", "/**/*.woff","/**/*.map", "/**/*.ttf", "/**/*.woff2")
+//                .excludePathPatterns("/error");
     }
 
 }
