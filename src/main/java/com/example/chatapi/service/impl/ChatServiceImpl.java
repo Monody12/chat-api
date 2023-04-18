@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -51,7 +52,9 @@ public class ChatServiceImpl implements ChatService {
 
     private static final OkHttpClient httpClient = new OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(45, TimeUnit.SECONDS).build();
+            .readTimeout(45, TimeUnit.SECONDS)
+            .connectionPool(new ConnectionPool(100, 5, TimeUnit.SECONDS))  // 设置连接池
+            .build();
 
     @Override
     public ChatTopic newTopic(Integer userId, String topicName) {
@@ -79,6 +82,7 @@ public class ChatServiceImpl implements ChatService {
             String content = getUrlContent(chatHistories);
             Request request = new Request.Builder()
                     .url(url)
+                    .addHeader("Connection", "keep-alive")  // 添加 Connection 头
                     .post(okhttp3.RequestBody.create(content, okhttp3.MediaType.parse("application/json; charset=utf-8")))
                     .build();
             List<ChatConversationDTO> resConversationList = null;
