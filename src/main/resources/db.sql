@@ -9,7 +9,7 @@ create table user
     `nickname` varchar(127) not null comment '昵称',
     `key` varchar(127) null comment '密钥',
     `create_time` timestamp not null default current_timestamp comment '创建时间',
-    `update_time` timestamp not null default current_timestamp on update current_timestamp comment '更新时间',
+    `update_time` timestamp not null default current_timestamp on update current_timestamp comment '更新时间'
 ) engine=InnoDB default charset=utf8mb4 comment '用户表';
 /* 对用户名建立唯一索引 */
 alter table user add unique index `username` (`username`);
@@ -53,7 +53,7 @@ create table chat_history
     `user_id` int not null comment '用户id',
     `topic_id` int not null comment '话题id',
     `role` varchar(31) not null comment '角色 user or assistant',
-    `content` varchar(2047) not null comment '内容',
+    `content` varchar(4095) not null comment '内容',
     `create_time` timestamp not null default current_timestamp comment '创建时间',
     `update_time` timestamp not null default current_timestamp on update current_timestamp comment '更新时间'
 ) engine=InnoDB default charset=utf8mb4 comment '聊天记录表';

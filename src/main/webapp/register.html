@@ -86,6 +86,10 @@
       },
       errorInfo: ""
     },
+    created() {
+      //初始化的时候调用
+      axios.defaults.baseURL = 'http://gpt.dluserver.cn:8058';
+    },
     //函数写在这里
     methods: {
       setStorage(key, value) {

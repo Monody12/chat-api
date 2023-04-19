@@ -65,6 +65,7 @@
             errorInfo: ""
         },
         mounted: function () {
+            axios.defaults.baseURL = 'http://gpt.dluserver.cn:8058';
             this.$nextTick(function () {
                     // Code that will run only after the
                     // entire view has been rendered
