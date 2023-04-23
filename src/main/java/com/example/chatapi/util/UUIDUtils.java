@@ -1,6 +1,6 @@
 package com.example.chatapi.util;
 
-public class UUIDUtil {
+public class UUIDUtils {
     public static String getUUID(){
         return java.util.UUID.randomUUID().toString().replace("-","");
     }

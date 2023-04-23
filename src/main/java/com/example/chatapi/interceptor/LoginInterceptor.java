@@ -12,6 +12,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Enumeration;
+import java.util.Map;
 
 @Slf4j
 public class LoginInterceptor extends HandlerInterceptorAdapter {
@@ -29,12 +30,16 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        log.info("HttpServletRequest class:{}",request.getClass().getName());
         if ("OPTIONS".equals(request.getMethod())) { // 检查请求是否为CORS预检请求
             response.setStatus(HttpServletResponse.SC_OK);
             return true; // 不拦截CORS预检请求
         }
         // 打印请求路径
         log.info("请求路径：" + request.getRequestURI());
+        // 获取ParameterMap
+        Map<String, String[]> parameterMap = request.getParameterMap();
+        parameterMap.forEach((key, value) -> log.info("请求参数：{}={}", key, value[0]));
         // 获取请求头中的token和userId
         String Authorization = request.getHeader("Authorization");
         if (Authorization == null) {
@@ -58,11 +63,10 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
             request.getRequestDispatcher("/user/not_login").forward(request, response);
             return false;
         }
-        // 写回请求头
-        CustomHttpServletRequestWrapper requestWrapper = new CustomHttpServletRequestWrapper(request);
-        requestWrapper.addHeader("token", token);
-        requestWrapper.addHeader("userId", userId);
-        return super.preHandle(requestWrapper, response, handler);
+        // 写回信息到request中
+        request.setAttribute("userId", userId);
+        request.setAttribute("token", token);
+        return super.preHandle(request, response, handler);
     }
 
     /**

@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @Slf4j
-//@RestController
-@RequestMapping("/admin/key")
+@RestController
+//@RequestMapping("/admin/key")
 public class AdminKeyController {
 
     @Autowired

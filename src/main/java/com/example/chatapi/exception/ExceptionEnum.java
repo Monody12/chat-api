@@ -14,7 +14,15 @@ public enum ExceptionEnum {
     USERNAME_EXIST(1001, "用户名已存在"),
     USERNAME_NOT_EXIST(1002, "用户名不存在"),
     PASSWORD_ERROR(1003, "用户名或密码错误"),
-
+    MAIL_EXIST(1004, "邮箱已存在"),
+    // 当前邮箱发送邮件次数过于频繁，1小时后再试
+    MAIL_SEND_LIMIT(1005, "当前邮箱发送邮件次数过于频繁，1小时后再试"),
+    // 当前ip发送邮件次数过于频繁，1小时后再试
+    IP_SEND_LIMIT(1006, "当前ip发送邮件次数过于频繁，1小时后再试"),
+    // 用户名与邮箱不匹配
+    USERNAME_MAIL_NOT_MATCH(1007, "用户名与邮箱不匹配"),
+    // 验证码不正确或已过期
+    VERIFICATION_CODE_ERROR(1008, "验证码不正确或已过期"),
     // key绑定用户数到达上限
     KEY_USER_LIMIT(1101, "key绑定用户数到达上限"),
     // key不存在

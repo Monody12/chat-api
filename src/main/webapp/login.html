@@ -48,6 +48,7 @@
             <p style="color: red">{{errorInfo}}</p>
             <el-button type="primary" style="margin-left: 80px" @click="submitForm">登录</el-button>
             <el-link href="register.html" target="_blank" :underline="false" style="margin-left: 10px">注册</el-link>
+            <el-link href="reset_password.html" target="_blank" :underline="false" style="margin-left: 10px">重置密码</el-link>
         </el-form>
     </div>
 </div>
@@ -65,7 +66,8 @@
             errorInfo: ""
         },
         mounted: function () {
-            axios.defaults.baseURL = 'http://gpt.dluserver.cn:8058';
+            // axios.defaults.baseURL = 'http://gpt.dluserver.cn:8058';
+            axios.defaults.baseURL = 'http://127.0.0.1:8081';
             this.$nextTick(function () {
                     // Code that will run only after the
                     // entire view has been rendered

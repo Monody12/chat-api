@@ -18,7 +18,8 @@ public class InterceptorConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(loginInterceptor()).addPathPatterns("/key/**", "/chat/**");
+        registry.addInterceptor(loginInterceptor()).addPathPatterns("/key/**", "/chat/**")
+                .addPathPatterns("/user/nickname","/user/mail");
 //                .excludePathPatterns("/user/login", "/user/register", "/user/logout", "/user/not_login")
 //                .excludePathPatterns("/**/*.html", "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg",
 //                        "/**/*.gif", "/**/*.svg", "/**/*.ico", "/**/*.woff","/**/*.map", "/**/*.ttf", "/**/*.woff2")

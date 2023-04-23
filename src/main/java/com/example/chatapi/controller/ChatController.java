@@ -37,7 +37,7 @@ public class ChatController {
 
 
     @PostMapping("")
-    public Result chat(@RequestHeader Integer userId,@RequestBody ChatHistoryReq chatHistoryReq) {
+    public Result chat(@RequestAttribute Integer userId,@RequestBody ChatHistoryReq chatHistoryReq) {
         List<ChatHistory> historyList = chatHistoryReq.getChatHistoryList();
         historyList.get(0).setTopicId(chatHistoryReq.getTopicId());
         historyList.forEach(chatHistory -> chatHistory.setUserId(userId));
@@ -46,25 +46,25 @@ public class ChatController {
     }
 
     @GetMapping("/history")
-    public Result getHistory(@RequestHeader Integer userId, @NotNull Integer topicId) {
+    public Result getHistory(@RequestAttribute Integer userId, @NotNull Integer topicId) {
         List<ChatHistory> chatHistoryList = chatService.getChatHistory(userId, topicId);
         return ResultEnum.SUCCESS.setData(chatHistoryList).getResult();
     }
 
     @GetMapping("/topic/new")
-    public Result newTopic(@RequestHeader Integer userId,String topicName) {
+    public Result newTopic(@RequestAttribute Integer userId,String topicName) {
         ChatTopic chatTopic = chatService.newTopic(userId, topicName);
         return ResultEnum.SUCCESS.setData(chatTopic).getResult();
     }
 
     @GetMapping("/topic/rename")
-    public Result renameTopic(@RequestHeader Integer userId, @NotNull Integer topicId, String topicName) {
+    public Result renameTopic(@RequestAttribute Integer userId, @NotNull Integer topicId,@NotNull String topicName) {
         chatService.renameChatTopic(userId, topicId, topicName);
         return ResultEnum.SUCCESS.getResult();
     }
 
     @GetMapping("/topic")
-    public Result getTopic(@RequestHeader Integer userId) {
+    public Result getTopic(@RequestAttribute Integer userId) {
         List<ChatTopic> chatTopicList = chatService.getChatTopic(userId);
         // 按id降序排序
         chatTopicList.sort((o1, o2) -> Integer.compare(o2.getId(), o1.getId()));
@@ -72,7 +72,7 @@ public class ChatController {
     }
 
     @GetMapping("/topic/delete")
-    public Result deleteTopic(@RequestHeader Integer userId, @NotNull Integer topicId) {
+    public Result deleteTopic(@RequestAttribute Integer userId, @NotNull Integer topicId) {
         chatService.deleteChatTopic(userId, topicId);
         return ResultEnum.SUCCESS.getResult();
     }

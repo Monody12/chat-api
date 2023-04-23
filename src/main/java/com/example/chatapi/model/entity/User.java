@@ -20,6 +20,11 @@ public class User {
     @TableField(value = "`key`")
     private String key;
     /**
+     * 绑定邮箱
+     */
+    private String mail;
+
+    /**
      * 用户登录token，不存在数据表，存在redis中
      */
     @TableField(exist = false)

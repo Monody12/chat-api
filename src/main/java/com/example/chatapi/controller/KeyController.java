@@ -3,6 +3,7 @@ package com.example.chatapi.controller;
 import com.example.chatapi.model.res.Result;
 import com.example.chatapi.model.res.ResultEnum;
 import com.example.chatapi.service.ChatKeyService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,13 +16,13 @@ public class KeyController {
     private ChatKeyService chatKeyService;
 
     @GetMapping("/times")
-    public Result getTimes(@RequestHeader Integer userId) {
+    public Result getTimes(@RequestAttribute Integer userId) {
         int times = chatKeyService.keyTimes(userId);
         return ResultEnum.SUCCESS.setData(times).getResult();
     }
 
-    @GetMapping("/changeBind")
-    public Result changeBind(String key,@RequestHeader Integer userId) {
+    @PostMapping("/changeBind")
+    public Result changeBind(@NotNull String key, @RequestAttribute Integer userId) {
         chatKeyService.changeBind(key, userId);
         return ResultEnum.SUCCESS.getResult();
     }

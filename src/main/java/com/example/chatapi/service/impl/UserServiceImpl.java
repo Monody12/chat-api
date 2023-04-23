@@ -7,7 +7,8 @@ import com.example.chatapi.mapper.UserMapper;
 import com.example.chatapi.model.entity.User;
 import com.example.chatapi.service.ChatKeyService;
 import com.example.chatapi.service.UserService;
-import com.example.chatapi.util.UUIDUtil;
+import com.example.chatapi.util.FormatChecker;
+import com.example.chatapi.util.UUIDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.concurrent.TimeUnit;
 
+import static com.example.chatapi.constant.RedisConstant.RESET_PASSWORD_CODE_PREFIX;
 import static com.example.chatapi.constant.RedisConstant.USER_TOKEN_PREFIX;
 
 @Service
@@ -70,15 +72,15 @@ public class UserServiceImpl implements UserService {
         if (!user.getPassword().equals(password)) {
             ExceptionEnum.PASSWORD_ERROR.throwException();
         }
-        String token = UUIDUtil.getUUID();
+        String token = UUIDUtils.getUUID();
         user.setToken(token);
         // 存入redis，有效期为7天
-        redisTemplate.opsForValue().set(USER_TOKEN_PREFIX + token, user.getId().toString(),7, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set(USER_TOKEN_PREFIX + token, user.getId().toString(), 7, TimeUnit.DAYS);
         return user;
     }
 
     @Override
-    public void logout(@RequestHeader String token, Integer userId) {
+    public void logout(String token, Integer userId) {
         String userIdStr = tokenToUserId(token);
         if (userIdStr != null && userId.equals(Integer.valueOf(userIdStr))) {
             redisTemplate.delete(getTokenRedisKey(token));
@@ -104,5 +106,58 @@ public class UserServiceImpl implements UserService {
     public String tokenToUserId(String token) {
         String key = getTokenRedisKey(token);
         return redisTemplate.opsForValue().get(key);
+    }
+
+    /**
+     * 内部：根据用户名查询用户信息
+     *
+     * @param username
+     */
+    @Override
+    public User selectByUsername(String username) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUsername, username);
+        return userMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public Integer getUserId(String username, String email) {
+        User user = selectByUsername(username);
+        if (user == null) {
+            ExceptionEnum.USERNAME_NOT_EXIST.throwException();
+        } else if (!user.getMail().equals(email)) {
+            ExceptionEnum.USERNAME_MAIL_NOT_MATCH.throwException();
+        }
+        return user.getId();
+    }
+
+    @Override
+    public void resetPassword(Integer userId, String code, String password) {
+        String key = RESET_PASSWORD_CODE_PREFIX + userId;
+        String codeInRedis = redisTemplate.opsForValue().get(key);
+        if (codeInRedis == null || !codeInRedis.equals(code)) {
+            ExceptionEnum.VERIFICATION_CODE_ERROR.throwException();
+        }
+        User user = new User();
+        user.setId(userId);
+        user.setPassword(password);
+        userMapper.updateById(user);
+    }
+
+    @Override
+    public void changeNickname(String nickname, Integer userId) {
+        User user = new User();
+        user.setId(userId);
+        user.setNickname(nickname);
+        userMapper.updateById(user);
+    }
+
+    @Override
+    public void changeMail(String mail, Integer userId) {
+        FormatChecker.mailCheck(mail);
+        User user = new User();
+        user.setId(userId);
+        user.setMail(mail);
+        userMapper.updateById(user);
     }
 }

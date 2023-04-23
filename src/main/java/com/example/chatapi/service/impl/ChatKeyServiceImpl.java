@@ -10,7 +10,7 @@ import com.example.chatapi.model.entity.ChatKey;
 import com.example.chatapi.model.entity.ChatKeyBind;
 import com.example.chatapi.model.entity.User;
 import com.example.chatapi.service.ChatKeyService;
-import com.example.chatapi.util.UUIDUtil;
+import com.example.chatapi.util.UUIDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -199,7 +199,7 @@ public class ChatKeyServiceImpl extends ServiceImpl<ChatKeyMapper, ChatKey> impl
         List<ChatKey> chatKeys = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             ChatKey chatKey = new ChatKey();
-            chatKey.setKey(UUIDUtil.getUUID());
+            chatKey.setKey(UUIDUtils.getUUID());
             chatKey.setTimes(times);
             chatKeys.add(chatKey);
         }

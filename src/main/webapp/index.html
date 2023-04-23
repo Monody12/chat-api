@@ -8,7 +8,8 @@
     <script src="js/vue.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/axios.min.js" type="text/javascript"></script>
     <script src="js/elementUI.js" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"
+            type="text/javascript"></script>
     <style type="text/css">
 
         .el-header {
@@ -59,7 +60,7 @@
     <el-container style="height: 100%; border: 1px solid #eee">
         <el-aside width="300px" style="background-color: rgb(238, 241, 246)">
             <el-menu :default-openeds="['1']" @click.stop>
-                <el-submenu index="2" >
+                <el-submenu index="2">
                     <template slot="title">
                         我的对话
                     </template>
@@ -84,7 +85,7 @@
                     <i class="el-icon-setting" style="margin-right: 15px"></i>
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item command="showKey">查看Key</el-dropdown-item>
-                        <el-dropdown-item command="dialogFormVisible2 = true">修改信息</el-dropdown-item>
+                        <el-dropdown-item command="changeUserInfo">修改信息</el-dropdown-item>
                         <el-dropdown-item command="logout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -107,7 +108,7 @@
                         <el-row>
                             <el-col :span="20">
                                 <el-input v-model="input_message" type="textarea" :autosize="{ minRows: 2, maxRows: 30}"
-                                          placeholder=""></el-input>
+                                          placeholder="" autofocus></el-input>
                             </el-col>
                             <el-col :span="2">
                                 <center>
@@ -129,23 +130,23 @@
                     <el-input v-model="userInfo.username" autocomplete="off" :disabled="true"></el-input>
                 </el-form-item>
                 <el-form-item label="昵称" :label-width="formLabelWidth2">
-                    <el-input v-model="form3.nickname" autocomplete="off"></el-input>
+                    <el-input placeholder="如需修改昵称，请在此输入新昵称" v-model="form3.nickname" autocomplete="off">
+                        <el-button slot="append" icon="el-icon-finished" @click="changeNickname">提交</el-button>
+                    </el-input>
                 </el-form-item>
-                <el-form-item label="原密码" :label-width="formLabelWidth2">
-                    <el-input placeholder="如需更改密码，请在此输入原密码" v-model="form3.old_password" show-password
-                              autocomplete="new-password"></el-input>
+                <el-form-item label="邮箱" :label-width="formLabelWidth2">
+                    <el-input placeholder="如需修改邮箱，请在此输入新邮箱" v-model="form3.mail" autocomplete="off">
+                        <el-button slot="append" icon="el-icon-finished" @click="changeMail">提交</el-button>
+                    </el-input>
                 </el-form-item>
                 <el-form-item label="密码" :label-width="formLabelWidth2">
-                    <el-input placeholder="如需更改密码，请在此输入新密码" v-model="form3.password" show-password
-                              autocomplete="new-password"></el-input>
+                    <el-button @click="window.open('./reset_password.html')" icon="el-icon-lock">修改密码</el-button>
                 </el-form-item>
-                <el-form-item label="确认密码" :label-width="formLabelWidth2">
-                    <el-input placeholder="再输入一次新密码以确认更改" v-model="form3.confirm_password" show-password
-                              autocomplete="new-password"></el-input>
-                </el-form-item>
-                <el-form-item label="换绑key" :label-width="formLabelWidth2">
-                    <el-input placeholder="如需绑定新key，请在此输入key" v-model="form3.key" show-password
-                              autocomplete="off"></el-input>
+                <el-form-item label="绑定key" :label-width="formLabelWidth2">
+                    <el-input placeholder="如需绑定新key，请在此输入key" v-model="form3.key"
+                              autocomplete="off">
+                        <el-button slot="append" icon="el-icon-finished" @click="changeBind">提交</el-button>
+                    </el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -211,6 +212,7 @@
         el: '#app',
         //初始化数据
         data: {
+            window: window,
             userInfo: {
                 username: null,
                 nickname: '未登录',
@@ -233,10 +235,8 @@
             formLabelWidth2: '120px',
             form3: {
                 nickname: '',
-                old_password: '',
-                password: '',
-                confirm_password: '',
-                key: ''
+                key: '',
+                mail: ''
             },
         },
         //函数写在这里
@@ -369,14 +369,14 @@
                         }
                     }).then(response => {
                         let code = response.data.code
-                        if (code == 200){
+                        if (code == 200) {
                             let removedTopicId = this.topic[index].id;
                             this.topic.splice(index, 1);
                             // 如果删除的是当前选中的话题，需要将当前选中的话题改为第0个
                             if (this.select_topic_id == removedTopicId) {
                                 this.selectFirstTopic();
                             }
-                        }else {
+                        } else {
                             this.$message({
                                 type: 'error',
                                 message: response.data.msg
@@ -397,7 +397,8 @@
                 } else if (command == 'showKey') {
                     this.showKey();
                 } else if (command == 'changeUserInfo') {
-                    this.changeUserInfo();
+                    console.log("changeUserInfo");
+                    this.dialogFormVisible2 = true;
                 }
             },
             logout() {
@@ -436,7 +437,7 @@
                 }
             },
             // 对话题改名称
-            renameTopic(index){
+            renameTopic(index) {
                 // 弹出一个输入框，输入新的话题名称
                 this.$prompt('请输入新的话题名称', '提示', {
                     confirmButtonText: '确定',
@@ -444,7 +445,7 @@
                     inputPattern: /^.{1,15}$/,
                     inputErrorMessage: '话题名称长度在1到15个字符之间',
                     inputValue: this.topic[index].topic
-                }).then(({ value }) => {
+                }).then(({value}) => {
                     // 发送请求，修改话题名称
                     axios.get('./chat/topic/rename', {
                         params: {
@@ -463,40 +464,78 @@
                     });
                 });
             },
-            // 修改用户信息
+            // 修改用户信息（已弃用）
             changeUserInfo() {
-                if (!this.checkUserInfoForm()) {
+
+            },
+            // 修改用户昵称
+            changeNickname() {
+                if (!this.checkNickname(this.form3.nickname)) {
+                    this.$message.error('昵称格式不正确')
                     return
                 }
                 var params = new URLSearchParams()
-                params.append("username", this.username)
                 params.append("nickname", this.form3.nickname)
-                params.append("old_password", this.form3.old_password)
-                const hashedPassword = this.hashPassword(this.form3.password)
-                params.append("password", hashedPassword)
-                params.append("token", this.token)
-                axios.post("./user/update", params).then(res => {
-                    this.dialogFormVisible2 = false
-                    var info = res.data
-                    if (info == 1)
-                        this.$message.error('昵称格式不正确')
-                    else if (info == 2)
-                        this.$message.error('密码格式不正确')
-                    else if (info == 3)
-                        this.$message.error('原密码不正确')
-                    else if (info == 4)
-                        this.$message.error('身份校验失败，请注销后重新登录再次尝试');
-                    else if (info == 5) {
-                        this.$message.success('昵称更新成功')
-                        var userInfo = this.getStorage("userInfo")  //从缓存中取出用户信息
-                        this.nickname = userInfo.nickname = this.form3.nickname  //更新昵称
-                        console.log(userInfo)
-                        this.setStorage("userInfo", userInfo)  //将更新后的信息存入
-                    } else if (info == 6) {
-                        this.$message.success('信息更新成功')
-                        setTimeout(this.logout, 3000)
-                    } else
-                        this.$message.error('信息更新失败')
+                axios.post("./user/nickname", params).then(res => {
+                    if (res.data.code == 200) {
+                        this.$message({
+                            type: 'success',
+                            message: '修改成功'
+                        });
+                        this.dialogFormVisible2 = false;
+                        // 修改localStorage中的userInfo
+                        this.userInfo.nickname = this.form3.nickname;
+                        localStorage.setItem('userInfo', JSON.stringify(this.userInfo));
+                    } else {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.msg
+                        });
+                    }
+                })
+            },
+            // 换绑key
+            changeBind() {
+                var params = new URLSearchParams()
+                params.append("key", this.form3.key)
+                axios.post("./key/changeBind", params).then(res => {
+                    if (res.data.code == 200) {
+                        this.$message({
+                            type: 'success',
+                            message: '修改成功'
+                        });
+                        this.dialogFormVisible2 = false;
+                        // 修改localStorage中的userInfo
+                        this.userInfo.key = this.form3.key;
+                        localStorage.setItem('userInfo', JSON.stringify(this.userInfo));
+                    } else {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.msg
+                        });
+                    }
+                })
+            },
+            // 设置邮箱
+            changeMail() {
+                var params = new URLSearchParams()
+                params.append("mail", this.form3.mail)
+                axios.post("./user/mail", params).then(res => {
+                    if (res.data.code == 200) {
+                        this.$message({
+                            type: 'success',
+                            message: '修改成功'
+                        });
+                        this.dialogFormVisible2 = false;
+                        // 修改localStorage中的userInfo
+                        this.userInfo.mail = this.form3.mail;
+                        localStorage.setItem('userInfo', JSON.stringify(this.userInfo));
+                    } else {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.msg
+                        });
+                    }
                 })
             },
             // 导入的通用方法
@@ -532,11 +571,15 @@
                 config.headers.Authorization = token + '#' + userId;
                 return config;
             });
-            axios.defaults.headers['Content-Type'] = 'application/json';
-            axios.defaults.headers['userId'] = userId;
+            // axios.defaults.headers['Content-Type'] = 'application/json';
+            // axios.defaults.headers['userId'] = userId;
             axios.defaults.headers['token'] = token;
-            axios.defaults.baseURL = 'http://gpt.dluserver.cn:8058';
-
+            // axios.defaults.baseURL = 'http://gpt.dluserver.cn:8058';
+            axios.defaults.baseURL = 'http://127.0.0.1:8081';
+            // 初始化form3
+            this.form3.nickname = this.userInfo.nickname;
+            this.form3.key = this.userInfo.key;
+            this.form3.mail = this.userInfo.mail;
         },
         async mounted() {
             this.getAllTopic().then(res => {

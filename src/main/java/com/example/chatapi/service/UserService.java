@@ -18,4 +18,16 @@ public interface UserService {
 
     String tokenToUserId(String token);
 
+    /**
+     * 内部：根据用户名查询用户信息
+     */
+    User selectByUsername(String username);
+
+    Integer getUserId(String username, String email);
+
+    void resetPassword(Integer userId, String code, String password);
+
+    void changeNickname(String nickname, Integer userId);
+
+    void changeMail(String mail, Integer userId);
 }
