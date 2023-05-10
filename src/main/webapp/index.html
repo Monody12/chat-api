@@ -107,8 +107,8 @@
                     <div class="message-input">
                         <el-row>
                             <el-col :span="20">
-                                <el-input v-model.trim.lazy="input_message" type="textarea" :autosize="{ minRows: 2, maxRows: 30}"
-                                          placeholder="" autofocus @keyup.shift.enter.native="postChat()" ref="myInput"></el-input>
+                                <el-input v-model.lazy="input_message" type="textarea" :autosize="{ minRows: 2, maxRows: 30}"
+                                          placeholder="" autofocus @keyup.enter.native="handleKeyDown" ref="myInput"></el-input>
                             </el-col>
                             <el-col :span="2">
                                 <center>
@@ -264,7 +264,6 @@
                 return new Promise((resolve, reject) => {
                     axios.get('./chat/topic').then(response => {
                         this.topic = response.data.data;
-                        console.log("topic: " + this.topic);
                         resolve()
                     }).catch(error => {
                         reject(error)
@@ -272,7 +271,6 @@
                 })
             },
             getChatHistory(index) {
-                console.log("index: " + index);
                 this.select_topic_id = this.topic[index].id;
                 axios.get('./chat/history', {
                     params: {
@@ -339,7 +337,6 @@
                         topicName: '新话题'
                     }
                 }).then(response => {
-                    console.log("newTopic: " + response.data.data);
                     // 新建的话题放到数组首位
                     this.topic.unshift(response.data.data);
                     this.select_topic_id = this.topic[0].id;
@@ -555,6 +552,19 @@
             isCursorInInput() {
                 return document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA'
             },
+            handleKeyDown(e) {
+                console.log(e)
+                if (e.keyCode === 13) {
+                    // 如果用户输入 shift + enter 则追加换行符
+                    if (e.shiftKey) {
+                        this.input_message += '\n'
+                    }
+                    // 如果用户输入 enter 则发送消息
+                    else {
+                        this.postChat()
+                    }
+                }
+            },
             // 导入的通用方法
             hashPassword(password) {
                 const saltedPassword = password + "salt";
@@ -610,7 +620,6 @@
         },
         async mounted() {
             this.getAllTopic().then(res => {
-                console.log("mounted_topic: " + this.topic);
                 // 默认选中第一个话题
                 if (this.topic.length > 0) {
                     this.getChatHistory(0);
