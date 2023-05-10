@@ -115,7 +115,6 @@
                                     <el-button type="primary" @click="postChat()" :disabled="post_button_disabled">
                                         发送 <i class="el-icon-loading" v-if="post_button_disabled"></i>
                                     </el-button>
-                                    <el-button type="primary" @click="test">聚焦</el-button>
                                 </center>
                             </el-col>
                         </el-row>
@@ -599,10 +598,6 @@
                 return response;
             }, function (error) {
                 if (error.response.status === 401) {
-                    this.$message({
-                        type: 'error',
-                        message: '登录过期，请重新登录'
-                    });
                     // token过期，跳转到登录页面
                     window.location.href = "./login.html";
                 }
