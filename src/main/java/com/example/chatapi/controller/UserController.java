@@ -1,5 +1,6 @@
 package com.example.chatapi.controller;
 
+import com.example.chatapi.captcha.VerifyCode;
 import com.example.chatapi.mapper.UserMapper;
 import com.example.chatapi.model.entity.User;
 import com.example.chatapi.model.res.Result;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.Enumeration;
 
 @RestController
@@ -26,6 +28,7 @@ public class UserController {
     @Autowired
     private UserMailService userMailService;
 
+    @VerifyCode
     @PostMapping("/register")
     public Result register(@NotNull String username,@NotNull String password,
                            @NotNull String nickname,@NotNull String key){
@@ -33,7 +36,9 @@ public class UserController {
         return ResultEnum.SUCCESS.getResult();
     }
 
+    @VerifyCode
     @PostMapping("/login")
+    @CrossOrigin(origins = "*",maxAge = 3600)
     public Result login(@NotNull String username,@NotNull String password){
         User user = userService.login(username, password);
         return ResultEnum.SUCCESS.setData(user).getResult();
@@ -46,7 +51,9 @@ public class UserController {
     }
 
     @GetMapping("/not_login")
-    public Result notLogin(){
+    public Result notLogin(HttpServletResponse response){
+        // 设置状态码为401
+        response.setStatus(401);
         return ResultEnum.UNAUTHORIZED.getResult();
     }
 
@@ -72,6 +79,7 @@ public class UserController {
     /**
      * 密码重置，提交验证码和新密码
      */
+    @VerifyCode
     @PostMapping("/reset/password")
     public Result resetPassword(@NotNull Integer userId,@NotNull String code,@NotNull String password){
         userService.resetPassword(userId,code,password);

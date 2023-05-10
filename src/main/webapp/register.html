@@ -25,8 +25,17 @@
       justify-content: center; /*定义body的里的元素水平居中*/
     }
 
-    #login {
+    #captcha {
+      width: 121px;
+      height: 40px;
+      /*margin-bottom: 10px;*/
+      margin: 0;
+      padding: 0;
+    }
 
+    #captcha img {
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
@@ -65,6 +74,19 @@
         </el-form-item>
       </el-tooltip>
 
+      <el-form-item label="验证码">
+        <el-row>
+          <el-col :span="8">
+            <el-input v-model="form.captcha" autocomplete="off"></el-input>
+          </el-col>
+          <el-col :span="16">
+            <div id="captcha">
+              <img id="captcha_img" @click="refreshCaptcha" style="cursor: pointer;">
+            </div>
+          </el-col>
+        </el-row>
+      </el-form-item>
+
       <p style="color: red">{{errorInfo}}</p>
       <el-button type="primary" style="margin-left: 80px" @click="submitForm">注册</el-button>
     </el-form>
@@ -82,14 +104,15 @@
         password: "",
         confirm_password: "",
         nickname: "",
-        key: ""
+        key: "",
+        captcha: ""
       },
       errorInfo: ""
     },
     created() {
       //初始化的时候调用
-      // axios.defaults.baseURL = 'http://gpt.dluserver.cn:8058';
-      axios.defaults.baseURL = 'http://127.0.0.1:8081';
+      axios.defaults.baseURL = 'http://gpt.dluserver.cn:8058';
+      // axios.defaults.baseURL = 'http://127.0.0.1:8081';
     },
     //函数写在这里
     methods: {
@@ -125,8 +148,9 @@
                 message: '注册成功',
                 type: 'success'
               });
-              this.setStorage("userInfo", res.data.data)
-              window.location.href = "./index.html"
+              // this.setStorage("userInfo", res.data.data)
+                // 此时没有token，需要跳转到登录页
+              window.location.href = "./login.html"
             } else {
               this.errorInfo = res.data.msg
             }
@@ -134,6 +158,34 @@
 
 
         }
+      },
+      // 刷新验证码
+      refreshCaptcha() {
+        const captchaDiv = document.getElementById('captcha');
+        axios.get('/kaptcha', {
+          responseType: 'blob',
+          // withCredentials: true
+        })
+                .then(response => {
+                  const reader = new FileReader();
+                  reader.readAsDataURL(response.data);
+                  reader.onload = () => {
+                    const imageUrl = reader.result;
+                    const captchaImg = document.createElement('img');
+                    captchaImg.src = imageUrl;
+                    captchaImg.id = 'captcha_img';
+                    captchaImg.style.cursor = 'pointer';
+                    captchaImg.addEventListener('click', this.refreshCaptcha);
+                    captchaDiv.removeChild(document.getElementById('captcha_img'));
+                    captchaDiv.appendChild(captchaImg);
+                  };
+                  // 取出键为captchaKey的响应头
+                  debugger
+                  this.captchaKey = response.headers['captcha-key']
+                })
+                .catch(error => {
+                  console.error(error);
+                });
       },
       isJSON(str) {
         if (typeof str == 'string') {

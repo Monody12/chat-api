@@ -107,14 +107,15 @@
                     <div class="message-input">
                         <el-row>
                             <el-col :span="20">
-                                <el-input v-model="input_message" type="textarea" :autosize="{ minRows: 2, maxRows: 30}"
-                                          placeholder="" autofocus></el-input>
+                                <el-input v-model.trim.lazy="input_message" type="textarea" :autosize="{ minRows: 2, maxRows: 30}"
+                                          placeholder="" autofocus @keyup.shift.enter.native="postChat()" ref="myInput"></el-input>
                             </el-col>
                             <el-col :span="2">
                                 <center>
                                     <el-button type="primary" @click="postChat()" :disabled="post_button_disabled">
                                         发送 <i class="el-icon-loading" v-if="post_button_disabled"></i>
                                     </el-button>
+                                    <el-button type="primary" @click="test">聚焦</el-button>
                                 </center>
                             </el-col>
                         </el-row>
@@ -207,7 +208,7 @@
         }
     });
 
-    new Vue({
+    const app = new Vue({
         //作用域
         el: '#app',
         //初始化数据
@@ -241,6 +242,10 @@
         },
         //函数写在这里
         methods: {
+            test(){
+                console.log(this.$refs.myInput)
+                this.$refs.myInput.focus();
+            },
             initUserInfo() {
                 // 从localStorage中读取userInfo
                 let userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -538,6 +543,19 @@
                     }
                 })
             },
+            // 用户快捷聚焦监听器（如果用户光标不在输入框上，且按下了i键，则聚焦到默认输入框myInput上）
+            userFocusListener() {
+                document.onkeyup = (e) => {
+                    if (e.code === 'KeyI' && !this.isCursorInInput()) {
+                        e.preventDefault()
+                        this.$refs.myInput.focus()
+                    }
+                }
+            },
+            // 判断光标是否在输入框上（包含任意类型的输入框）
+            isCursorInInput() {
+                return document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA'
+            },
             // 导入的通用方法
             hashPassword(password) {
                 const saltedPassword = password + "salt";
@@ -562,20 +580,34 @@
             }
         },
         created() {
-            // TODO 从localStorage中获取token和userId
+            // 从localStorage中获取token和userId
             this.initUserInfo()
             var userInfo = this.userInfo;
             var token = userInfo.token;
             var userId = userInfo.id;
+            // axios请求拦截器，将token和userId封装到请求头中
             axios.interceptors.request.use((config) => {
                 config.headers.Authorization = token + '#' + userId;
                 return config;
             });
             // axios.defaults.headers['Content-Type'] = 'application/json';
-            // axios.defaults.headers['userId'] = userId;
             axios.defaults.headers['token'] = token;
-            // axios.defaults.baseURL = 'http://gpt.dluserver.cn:8058';
-            axios.defaults.baseURL = 'http://127.0.0.1:8081';
+            axios.defaults.baseURL = 'http://gpt.dluserver.cn:8058';
+            // axios.defaults.baseURL = 'http://127.0.0.1:8081';
+            // axios响应拦截器，处理token过期导致的401错误
+            axios.interceptors.response.use(function (response) {
+                return response;
+            }, function (error) {
+                if (error.response.status === 401) {
+                    this.$message({
+                        type: 'error',
+                        message: '登录过期，请重新登录'
+                    });
+                    // token过期，跳转到登录页面
+                    window.location.href = "./login.html";
+                }
+                return Promise.reject(error);
+            });
             // 初始化form3
             this.form3.nickname = this.userInfo.nickname;
             this.form3.key = this.userInfo.key;
@@ -593,7 +625,12 @@
                     this.newTopic();
                 }
             })
-
+            // 监听用户快捷聚焦
+            this.userFocusListener();
+        },
+        beforeDestroy() {
+            // 移除监听器
+            document.onkeyup = null;
         }
     })
 </script>
