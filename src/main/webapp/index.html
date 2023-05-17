@@ -52,13 +52,57 @@
             flex-shrink: 0;
         }
 
+        /* 水平居中和垂直居中 */
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .box{
+            width: 200px;
+            height: 400px;
+        }
+
+        .tip_title{
+            width: 95%;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tip{
+            width: 95%;
+            height: 60px;
+            background-color: rgba(247,247,248);
+            border-top-width: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 10px 10px 10px;
+        }
+
+        /*容器排列*/
+        .container{
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        /* 可点击 */
+        .can_click{
+            cursor: pointer;
+        }
+
 
     </style>
 </head>
 <body>
 <div id="app">
     <el-container style="height: 100%; border: 1px solid #eee">
-        <el-aside width="300px" style="background-color: rgb(238, 241, 246)">
+        <el-aside v-show="aside_show" :width="'270px'" style="background-color: rgb(238, 241, 246)">
             <el-menu :default-openeds="['1']" @click.stop>
                 <el-submenu index="2">
                     <template slot="title">
@@ -81,45 +125,70 @@
 
         <el-container>
             <el-header style="text-align: right; font-size: 12px">
-                <el-dropdown @command="handleCommand">
-                    <i class="el-icon-setting" style="margin-right: 15px"></i>
-                    <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item command="showKey">查看Key</el-dropdown-item>
-                        <el-dropdown-item command="changeUserInfo">修改信息</el-dropdown-item>
-                        <el-dropdown-item command="logout">退出登录</el-dropdown-item>
-                    </el-dropdown-menu>
-                </el-dropdown>
-                <span>{{userInfo.nickname}}</span>
+                <div @click="aside_show=!aside_show" style="display: inline-block">
+                    <i class="el-icon-view" style="margin-right: 20px"></i>
+                </div>
+
+                    <el-dropdown @command="handleCommand">
+                        <i class="el-icon-setting" style="margin-right: 15px"></i>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item command="showKey">查看Key</el-dropdown-item>
+                            <el-dropdown-item command="changeUserInfo">修改信息</el-dropdown-item>
+                            <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                    <span>{{userInfo.nickname}}</span>
             </el-header>
 
             <el-main style="display: flex; flex-direction: column; height: 100%;">
-                <div style="flex-grow: 1; flex-shrink: 0; overflow-y: auto;">
-                    <msg-component v-if="dialogue.length == 0" :message="'你好！有什么我可以帮助你的吗？'" :index="1"
-                                   :avatar="getAvatar('assistant')">
-                    </msg-component>
+                <!--聊天-->
+                <div style="flex-grow: 1; flex-shrink: 0; overflow-y: auto;" v-show="!show_home">
+<!--                    <msg-component v-if="dialogue.length == 0" :message="'你好！有什么我可以帮助你的吗？'" :index="1"-->
+<!--                                   :avatar="getAvatar('assistant')" >-->
+<!--                    </msg-component>-->
                     <msg-component v-for="(item, index) in dialogue" :message="item.content"
                                    :avatar="getAvatar(item.role)" :index="index" :dialogue="dialogue"
+                                   :waiting="post_button_disabled"
                                    @update:message="item.content = $event"
                     >
                     </msg-component>
-
-                    <!-- 问题发送框：一个文本输入框，一个发送按钮 -->
-                    <div class="message-input">
-                        <el-row>
-                            <el-col :span="20">
-                                <el-input v-model.lazy="input_message" type="textarea" :autosize="{ minRows: 2, maxRows: 30}"
-                                          placeholder="" autofocus @keyup.enter.native="handleKeyDown" ref="myInput"></el-input>
-                            </el-col>
-                            <el-col :span="2">
-                                <center>
-                                    <el-button type="primary" @click="postChat()" :disabled="post_button_disabled">
-                                        发送 <i class="el-icon-loading" v-if="post_button_disabled"></i>
-                                    </el-button>
-                                </center>
-                            </el-col>
-                        </el-row>
+                </div>
+                <!--展示页-->
+                <div v-show="show_home">
+                    <center>
+                        <h1>人工智能对话系统</h1>
+                    </center>
+                    <div class="center" style="justify-content: space-evenly">
+                        <div class="box container">
+                            <div class="tip_title center">示例</div>
+                            <div class="tip can_click" @click="handleClickExample($event.target.innerText)">Explain quantum computing in simple terms</div>
+                            <div class="tip can_click" @click="handleClickExample($event.target.innerText)">Got any creative ideas for a 10 year old’s birthday?</div>
+                            <div class="tip can_click" @click="handleClickExample($event.target.innerText)">How do I make an HTTP request in Javascript?</div>
+                        </div>
+                        <div class="box container">
+                            <div class="tip_title center">能力</div>
+                            <div class="tip">Remembers what user said earlier in the conversation</div>
+                            <div class="tip">Allows user to provide follow-up corrections</div>
+                            <div class="tip">Trained to decline inappropriate requests</div>
+                        </div>
+                        <div class="box container">
+                            <div class="tip_title center">限制</div>
+                            <div class="tip">May occasionally generate incorrect information</div>
+                            <div class="tip">May occasionally produce harmful instructions or biased content</div>
+                            <div class="tip">Limited knowledge of world and events after 2021</div>
+                        </div>
                     </div>
                 </div>
+                <!--内容输入框-->
+                <el-input
+                        v-model.lazy="input_message"
+                        type="textarea"
+                        :autosize="{ minRows: 2, maxRows: 30}"
+                        placeholder=""
+                        autofocus
+                        @keyup.enter.native="handleKeyDown"
+                        ref="myInput"
+                ></el-input>
             </el-main>
         </el-container>
 
@@ -167,7 +236,8 @@
             index: {
                 type: Number,
                 required: false
-            }
+            },
+            waiting: Boolean
         },
         template: `
           <div>
@@ -180,7 +250,8 @@
                         placeholder=""></el-input>
             </el-col>
             <el-col :span="2">
-              &nbsp;&nbsp;<i class="el-icon-delete" v-if="index%2==0" @click="deleteMsg(index)"></i>
+              &nbsp;&nbsp;<i class="el-icon-delete" v-if="index%2===0 || index === dialogue.length-1" @click="deleteMsg(index)"></i><br>
+              &nbsp;&nbsp;<i class="el-icon-loading" v-if="index === dialogue.length-1 && waiting" @click="deleteMsg(index)"></i>
             </el-col>
           </el-row>
           <br><br>
@@ -238,6 +309,13 @@
                 key: '',
                 mail: ''
             },
+            // 展示aside
+            aside_show: true,
+        },
+        computed:{
+          show_home(){
+              return this.select_topic_id == null || this.dialogue.length === 0
+          }
         },
         //函数写在这里
         methods: {
@@ -286,7 +364,10 @@
                     }
                 })
             },
-            postChat() {
+            postChatMain(){
+                if(this.post_button_disabled){
+                    return
+                }
                 // 将当前用户的输入追加到dialogue数组中
                 this.dialogue.push({
                     "role": "user",
@@ -329,19 +410,33 @@
                     // 将对话发送按钮启用
                     this.post_button_disabled = false;
                 })
-
+            },
+            postChat() {
+                // 如果当前没有选中一个对话，则创建一个对话
+                if (this.select_topic_id == null) {
+                    this.newTopic().then(()=>{
+                        this.postChatMain()
+                    })
+                }else {
+                    this.postChatMain()
+                }
             },
             newTopic() {
-                axios.get('./chat/topic/new', {
-                    params: {
-                        topicName: '新话题'
-                    }
-                }).then(response => {
-                    // 新建的话题放到数组首位
-                    this.topic.unshift(response.data.data);
-                    this.select_topic_id = this.topic[0].id;
-                    this.dialogue = [];
-                })
+                return new Promise((resolve, reject)=>{
+                   // 异步操作
+                    axios.get('./chat/topic/new', {
+                        params: {
+                            topicName: '新话题'
+                        }
+                    }).then(response => {
+                        // 新建的话题放到数组首位
+                        this.topic.unshift(response.data.data);
+                        this.select_topic_id = this.topic[0].id;
+                        this.dialogue = [];
+                        // 执行完毕后调用resolve
+                        resolve()
+                    })
+                });
             },
             selectFirstTopic() {
                 this.select_topic_id = this.topic[0].id;
@@ -557,13 +652,30 @@
                 if (e.keyCode === 13) {
                     // 如果用户输入 shift + enter 则追加换行符
                     if (e.shiftKey) {
-                        this.input_message += '\n'
+                        // this.input_message += '\n'
                     }
                     // 如果用户输入 enter 则发送消息
                     else {
                         this.postChat()
                     }
                 }
+            },
+            // 显示和隐藏侧边栏
+            handleResize() {
+                const screenWidth = window.innerWidth
+                console.log("当前屏幕宽度：" + screenWidth + "px")
+                if (screenWidth < 850) {
+                    // 隐藏侧边栏
+                    this.aside_show = false
+                } else {
+                    // 显示侧边栏
+                    this.aside_show = true
+                }
+            },
+            // 用户点击推荐
+            handleClickExample(text){
+                this.input_message = text
+                this.$refs.myInput.focus()
             },
             // 导入的通用方法
             hashPassword(password) {
@@ -621,20 +733,24 @@
         async mounted() {
             this.getAllTopic().then(res => {
                 // 默认选中第一个话题
-                if (this.topic.length > 0) {
-                    this.getChatHistory(0);
-                }
+                // if (this.topic.length > 0) {
+                //     this.getChatHistory(0);
+                // }
                 // 创建一个新话题
-                else {
-                    this.newTopic();
-                }
+                // else {
+                //     this.newTopic();
+                // }
             })
             // 监听用户快捷聚焦
             this.userFocusListener();
+            // 监听窗口大小变化
+            window.addEventListener('resize', this.handleResize);
+            this.handleResize()
         },
         beforeDestroy() {
             // 移除监听器
             document.onkeyup = null;
+            window.removeEventListener('resize', this.handleResize);
         }
     })
 </script>
