@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class User {
     @TableId(type = IdType.AUTO)
@@ -23,6 +25,7 @@ public class User {
      * 绑定邮箱
      */
     private String mail;
+    private LocalDateTime createTime;
 
     /**
      * 用户登录token，不存在数据表，存在redis中
