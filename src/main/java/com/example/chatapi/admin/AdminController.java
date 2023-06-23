@@ -155,4 +155,25 @@ public class AdminController {
         chatKeyBindMapper.insert(chatKeyBind);
         return ResultEnum.SUCCESS.setData(chatKeyBind).getResult();
     }
+
+    @Autowired
+    private FeedbackMapper feedbackMapper;
+
+    @PutMapping("/feedback")
+    public Result updateFeedback(@RequestBody Feedback feedback){
+        feedbackMapper.updateById(feedback);
+        return ResultEnum.SUCCESS.getResult();
+    }
+
+    @GetMapping("/feedback/all")
+    public Result getAllFeedback(){
+        List<Feedback> feedbacks = feedbackMapper.selectList(null);
+        return ResultEnum.SUCCESS.setData(feedbacks).getResult();
+    }
+
+    @DeleteMapping("/feedback/{id}")
+    public Result deleteFeedback(@PathVariable Integer id){
+        feedbackMapper.deleteById(id);
+        return ResultEnum.SUCCESS.getResult();
+    }
 }
